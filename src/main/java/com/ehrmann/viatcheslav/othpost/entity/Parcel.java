@@ -16,4 +16,19 @@ import javax.persistence.Id;
 @Entity
 public class Parcel implements Serializable {
     @Id private long parcelID;
+    private long customerID;
+    private long invoiceID;
+    private String parcelTrackingID;
+    private String parcelTrackingNumber;
+    //private long warehouseID;
+    private long postmanID;
+    private String receipientForeName;
+    private String receipientSureName;
+    private int postalCode;
+    private String recCity;
+    private String recStreet;
+    private String recStreetNumber;
+    private int waightInGramm;
+
+    
 }

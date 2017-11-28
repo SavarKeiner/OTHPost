@@ -17,5 +17,13 @@ import javax.persistence.Id;
 @Entity
 public class Customer implements Serializable {
     @Id private long customerID;
+    private String forename;
+    private String surename;
+    private String city;
+    private String street;
+    private String streetNumber;
+    private String iban;
+    private int postalcode;
+    
     
 }

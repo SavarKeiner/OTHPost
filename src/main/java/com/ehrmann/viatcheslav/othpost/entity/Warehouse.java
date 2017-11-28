@@ -15,5 +15,10 @@ import javax.persistence.Id;
  */
 @Entity
 public class Warehouse implements Serializable {
-    @Id private long warehouseID;
+    @Id private Integer warehouseID;
+    private long postmanID;
+    private String street;
+    private String streetNumber;
+    private String city;
+    private int postalcode;
 }

@@ -16,4 +16,10 @@ import javax.persistence.Id;
 @Entity
 public class Postoffice implements Serializable {
     @Id private long postofficeID;
+    private long warehouseID;
+    private String street;
+    private String streetNumber;
+    private String city;
+    private int postalcode;
+    
 }

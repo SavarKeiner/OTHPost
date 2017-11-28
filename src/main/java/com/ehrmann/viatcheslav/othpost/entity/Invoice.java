@@ -16,5 +16,9 @@ import javax.persistence.Id;
 @Entity
 public class Invoice implements Serializable {
     @Id private long invoiceID;
-    
+    private long parcelID;
+    private float price;
+    private int parcelType;
+    private String creationDateTime;
+    private String paymentDateTime;
 }

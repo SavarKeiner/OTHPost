@@ -16,4 +16,9 @@ import javax.persistence.Id;
 @Entity
 public class Postman implements Serializable {
     @Id private long postmanID;
+    private long warehouseID;
+    private long emplyoeeNumber;
+    private String forename;
+    private String surename;
+    
 }
