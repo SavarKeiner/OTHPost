@@ -18,17 +18,12 @@ public class Parcel implements Serializable {
     @Id private long parcelID;
     private long customerID;
     private long invoiceID;
-    private String parcelTrackingID;
-    private String parcelTrackingNumber;
-    //private long warehouseID;
-    private long postmanID;
-    private String receipientForeName;
-    private String receipientSureName;
+    private String trackingID;
+    private String forename;
+    private String surename;
     private int postalCode;
-    private String recCity;
-    private String recStreet;
-    private String recStreetNumber;
+    private String city;
+    private String street;
+    private String sforetreetNumber;
     private int waightInGramm;
-
-    
 }

@@ -6,6 +6,9 @@
 package com.ehrmann.viatcheslav.othpost.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -21,4 +24,7 @@ public class Warehouse implements Serializable {
     private String streetNumber;
     private String city;
     private int postalcode;
+    
+    @ElementCollection
+    private List<String> postofficeList = new ArrayList<String>();
 }
