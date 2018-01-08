@@ -5,8 +5,10 @@
  */
 package com.ehrmann.viatcheslav.othpost.ui;
 
+import com.ehrmann.viatcheslav.othpost.entity.service.ShippingService;
 import java.io.IOException;
 import java.io.PrintWriter;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -20,6 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "EntityTester", urlPatterns = {"/EntityTester"})
 public class EntityTester extends HttpServlet {
 
+    @Inject
+    public ShippingService ship;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
