@@ -7,6 +7,8 @@ package com.ehrmann.viatcheslav.othpost.entity;
 
 import java.io.Serializable;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 
@@ -16,9 +18,8 @@ import javax.persistence.Id;
  */
 @Entity
 public class Customer implements Serializable {
+    @GeneratedValue( strategy=GenerationType.AUTO)
     @Id private long customerID;
-    private String forename;
-    private String surename;
 
     public long getCustomerID() {
         return customerID;
@@ -83,11 +84,12 @@ public class Customer implements Serializable {
     public void setPostalcode(int postalcode) {
         this.postalcode = postalcode;
     }
+    
+    private String forename;
+    private String surename;
     private String city;
     private String street;
     private String streetNumber;
     private String iban;
     private int postalcode;
-    
-    
 }

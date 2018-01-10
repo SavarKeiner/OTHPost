@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 /**
@@ -18,13 +20,72 @@ import javax.persistence.Id;
  */
 @Entity
 public class Warehouse implements Serializable {
+    @GeneratedValue( strategy=GenerationType.AUTO)
     @Id private Integer warehouseID;
-    private long postmanID;
+
+    public Integer getWarehouseID() {
+        return warehouseID;
+    }
+
+    public void setWarehouseID(Integer warehouseID) {
+        this.warehouseID = warehouseID;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public String getStreetNumber() {
+        return streetNumber;
+    }
+
+    public void setStreetNumber(String streetNumber) {
+        this.streetNumber = streetNumber;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public int getPostalcode() {
+        return postalcode;
+    }
+
+    public void setPostalcode(int postalcode) {
+        this.postalcode = postalcode;
+    }
+
+    public List<Postoffice> getPostofficeList() {
+        return postofficeList;
+    }
+
+    public void setPostofficeList(List<Postoffice> postofficeList) {
+        this.postofficeList = postofficeList;
+    }
+
+    public List<Postman> getPostmanList() {
+        return postmanList;
+    }
+
+    public void setPostmanList(List<Postman> postmanList) {
+        this.postmanList = postmanList;
+    }
+    
     private String street;
     private String streetNumber;
     private String city;
     private int postalcode;
     
     @ElementCollection
-    private List<String> postofficeList = new ArrayList<String>();
+    private List<Postoffice> postofficeList;
+    @ElementCollection
+    private List<Postman> postmanList;
 }

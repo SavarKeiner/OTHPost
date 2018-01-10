@@ -5,7 +5,7 @@
  */
 package com.ehrmann.viatcheslav.othpost.ui;
 
-import com.ehrmann.viatcheslav.othpost.entity.service.ShippingService;
+import com.ehrmann.viatcheslav.othpost.service.ShippingService;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.inject.Inject;

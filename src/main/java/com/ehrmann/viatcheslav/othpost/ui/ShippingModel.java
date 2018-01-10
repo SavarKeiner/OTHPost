@@ -7,7 +7,10 @@ package com.ehrmann.viatcheslav.othpost.ui;
 
 
 import com.ehrmann.viatcheslav.othpost.entity.Customer;
+import com.ehrmann.viatcheslav.othpost.entity.Parcel;
+import com.ehrmann.viatcheslav.othpost.entity.Tracking;
 import com.ehrmann.viatcheslav.othpost.service.ShippingService;
+import com.ehrmann.viatcheslav.othpost.service.TrackingService;
 import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
@@ -19,11 +22,11 @@ import javax.inject.Named;
  */
 @Named
 @SessionScoped
-public class TestModel implements Serializable {
+public class ShippingModel implements Serializable {
     @Inject
     private ShippingService ship;
-        
-    private String sendforename;
+    @Inject
+    private TrackingService trackingService;
 
     public String getSendforename() {
         return sendforename;
@@ -128,6 +131,7 @@ public class TestModel implements Serializable {
     public void setRecvpostalcode(String recvpostalcode) {
         this.recvpostalcode = recvpostalcode;
     }
+    private String sendforename;
     private String sendsurename;
     private String sendcity;
     private String sendstreet;
@@ -157,16 +161,22 @@ public class TestModel implements Serializable {
             Customer c = ship.isCustomerExsiting(sendforename, sendsurename, 
                     sendcity, sendstreet, sendstreetNumber, sendiban, Integer.parseInt(sendpostalcode));
             
-            if(c != null){
-                ship.createCustomer(sendforename, sendsurename, 
+            if(c == null){
+                c = ship.createCustomer(sendforename, sendsurename, 
                     sendcity, sendstreet, sendstreetNumber, sendiban, Integer.parseInt(sendpostalcode));
             }
             
-            ship.shipParcel(c, recvforename, recvsurename, recvcity, recvstreet, recvstreetNumber, Integer.parseInt(sendpostalcode));
+            Parcel parcel = ship.receiveParcel(recvforename, recvsurename, recvcity, recvstreet, recvstreetNumber, Integer.parseInt(sendpostalcode));
+            Tracking tracking = trackingService.createTrackingEntry(parcel);
+            //createInvoice
+            
+            
+            
+            ship.shipParcel(c, parcel, tracking);
         }
     }
     
-    public boolean verifyInputs(){
+    private boolean verifyInputs(){
         if(sendsurename.equals("")|| sendcity.equals("") || sendstreet.equals("") || sendstreetNumber.equals("") || 
                 sendiban.equals("") || sendpostalcode.equals("") || recvforename.equals("") || recvsurename.equals("") || 
                 recvcity.equals("") || recvstreet.equals("") || recvstreetNumber.equals("") || recvpostalcode.equals("") ){
