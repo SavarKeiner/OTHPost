@@ -21,13 +21,13 @@ import javax.persistence.Id;
 @Entity
 public class Warehouse implements Serializable {
     @GeneratedValue( strategy=GenerationType.AUTO)
-    @Id private Integer warehouseID;
+    @Id private long warehouseID;
 
-    public Integer getWarehouseID() {
+    public long getWarehouseID() {
         return warehouseID;
     }
 
-    public void setWarehouseID(Integer warehouseID) {
+    public void setWarehouseID(long warehouseID) {
         this.warehouseID = warehouseID;
     }
 

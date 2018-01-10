@@ -131,20 +131,20 @@ public class ShippingModel implements Serializable {
     public void setRecvpostalcode(String recvpostalcode) {
         this.recvpostalcode = recvpostalcode;
     }
-    private String sendforename;
-    private String sendsurename;
-    private String sendcity;
-    private String sendstreet;
-    private String sendstreetNumber;
-    private String sendiban;
-    private String sendpostalcode;
+    private String sendforename= "";
+    private String sendsurename= "";
+    private String sendcity= "";
+    private String sendstreet= "";
+    private String sendstreetNumber= "";
+    private String sendiban= "";
+    private String sendpostalcode= "";
     
-    private String recvforename;
-    private String recvsurename;
-    private String recvcity;
-    private String recvstreet;
-    private String recvstreetNumber;
-    private String recvpostalcode;
+    private String recvforename= "";
+    private String recvsurename= "";
+    private String recvcity= "";
+    private String recvstreet= "";
+    private String recvstreetNumber= "";
+    private String recvpostalcode= "";
     
     public void doTest(){
         
@@ -177,9 +177,9 @@ public class ShippingModel implements Serializable {
     }
     
     private boolean verifyInputs(){
-        if(sendsurename.equals("")|| sendcity.equals("") || sendstreet.equals("") || sendstreetNumber.equals("") || 
-                sendiban.equals("") || sendpostalcode.equals("") || recvforename.equals("") || recvsurename.equals("") || 
-                recvcity.equals("") || recvstreet.equals("") || recvstreetNumber.equals("") || recvpostalcode.equals("") ){
+        if(sendforename == "" || sendsurename== ""|| sendcity== "" || sendstreet== "" || sendstreetNumber== "" || 
+                sendiban== "" || sendpostalcode== "" || recvforename== "" || recvsurename== "" || 
+                recvcity== "" || recvstreet== "" || recvstreetNumber== "" || recvpostalcode== "" ){
                 return false;
         } else{
             return true;

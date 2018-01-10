@@ -12,39 +12,47 @@ import com.ehrmann.viatcheslav.othpost.entity.Postoffice;
 import com.ehrmann.viatcheslav.othpost.entity.Tracking;
 import com.ehrmann.viatcheslav.othpost.entity.TrackingStatus;
 import com.ehrmann.viatcheslav.othpost.entity.Warehouse;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import javax.annotation.Resource;
 import javax.ejb.Asynchronous;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
+import javax.transaction.UserTransaction;
 
 /**
  *
  * @author Slav
  */
+
 @RequestScoped
 public class ShippingService {
-    @PersistenceContext(unitName="com.ehrmann.viatcheslav_OTHPost_war_1.0-SNAPSHOTPU")
+    @PersistenceContext
     private EntityManager em;
+    
+    @Resource
+    private UserTransaction userTransaction;
  
-    @Asynchronous
+    @Transactional
     public void simulateDelivery(Parcel p){
-        TypedQuery<Warehouse> q = em.createQuery("SELECT w FROM Warehouse", Warehouse.class);
+        TypedQuery<Warehouse> q = em.createQuery("SELECT w FROM Warehouse as w", Warehouse.class);
         List<Warehouse> result = q.getResultList();
         
         Collections.shuffle(result);
         
         for(Warehouse w : result){
-            try{
-               Thread.sleep(10000);
-               em.getTransaction().begin();
+            //try{
+               //Thread.sleep(10000);
+               //em.getTransaction().begin();
                
                p.getTrackingID();
                Tracking t = em.find(Tracking.class, p.getTrackingID());
@@ -55,23 +63,34 @@ public class ShippingService {
                
                t.getTrackingStatus().add(ts);
                
-               em.getTransaction().commit();
-            } catch(Exception e){
+               em.persist(ts);
+               //em.getTransaction().commit();
+            //} catch(Exception e){
                 //
-            }
+            //}
         }        
     }
 
+    @Transactional
     public void shipParcel(Customer c, Parcel p, Tracking t){//need invoice
-        em.getTransaction().begin();
-        
+        //em.getTransaction().begin();
+
+
         p.setCustomerID(c.getCustomerID());
         p.setTrackingID(t.getTrackingID());
+        
+        //p.setCustomerID(c.getCustomerID());
+        //p.setTrackingID(t.getTrackingID());
+        
+        Parcel p1 = em.find(Parcel.class, p.getParcelID());
+        p1.setCustomerID(c.getCustomerID());
+        p1.setTrackingID(t.getTrackingID());
+        
+
         //p.setInvoiceID(i.getInvoiceID());
         
-        em.getTransaction().commit();
+        //em.getTransaction().commit();
         
-        isInitWarehouse();
         
         simulateDelivery(p);
         //do shipping
@@ -116,26 +135,27 @@ public class ShippingService {
     
     public Customer isCustomerExsiting(String forename, String surename, String city, 
             String street, String streetNumber, String iban, int postalcode){
-        TypedQuery<Customer> q = em.createQuery("SELECT c FROM"+ " Customer as c WHERE c.forename = :forename "
-                + "AND c.surename = :surename AND c.city = :city AND c.street = :street"
-                + "AND c.streetNumber = :streetNumber AND c.iban = :iban", Customer.class);
+        TypedQuery<Customer> q = em.createQuery("SELECT ca FROM Customer as ca WHERE ca.forename = :forename AND ca.surename = :surename AND ca.city = :city AND ca.street = :street AND ca.streetNumber = :streetNumber AND ca.iban = :iban", Customer.class);
         q.setParameter("forename", forename);
         q.setParameter("surename", surename);
         q.setParameter("city", city);
         q.setParameter("street", street);
         q.setParameter("streetNumber", streetNumber);
         q.setParameter("iban", iban);
-        q.setParameter("postalcode", postalcode);
+        //q.setParameter("postalcode", postalcode);
         List<Customer> result = q.getResultList();
+        
+        initWarehouse();
         
        if(q.getResultList().isEmpty())
            return null;
        else 
            return q.getResultList().get(0);
+       
     }
     
     private void isInitWarehouse(){
-        TypedQuery<Warehouse> q = em.createQuery("SELECT w FROM Warehouse", Warehouse.class);
+        TypedQuery<Warehouse> q = em.createQuery("SELECT w FROM Warehouse as w", Warehouse.class);
         List<Warehouse> result = q.getResultList();    
                 
         if(result.isEmpty()){
@@ -145,6 +165,16 @@ public class ShippingService {
     
     @Transactional
     private void initWarehouse(){
+        TypedQuery<Warehouse> q = em.createQuery("SELECT w FROM Warehouse as w", Warehouse.class);
+        List<Warehouse> result = q.getResultList();    
+                
+        if(!result.isEmpty()){
+            return;
+        }
+        
+        try{
+                    userTransaction.begin();
+                
         List<Postman> pl1 = new ArrayList<Postman>();
         List<Postman> pl2 = new ArrayList<Postman>();
         List<Postman> pl3 = new ArrayList<Postman>();
@@ -172,13 +202,16 @@ public class ShippingService {
         postman1.setStreet("Am Horn");
         postman1.setStreetNumber("3c");
         postman1.setEmplyoeeNumber(1);
+        
         postman1.setWarehouseID(w1.getWarehouseID());
+        em.persist(postman1);
         
         pl1.add(postman1);
         
         
         w1.setPostmanList(pl1);
         w1.setPostofficeList(po1);
+        
         
         w2.setStreet("Bogenstraße");
         w2.setStreetNumber("1a");
@@ -191,7 +224,6 @@ public class ShippingService {
         postman2.setStreet("Bogenstraße");
         postman2.setStreetNumber("3c");
         postman2.setEmplyoeeNumber(2);
-        postman2.setWarehouseID(w2.getWarehouseID());
         
         pl2.add(postman2);
         
@@ -210,20 +242,30 @@ public class ShippingService {
         postman3.setStreet("Spitzwegstraße");
         postman3.setStreetNumber("12");
         postman3.setEmplyoeeNumber(3);
-        postman3.setWarehouseID(w2.getWarehouseID());
         
         pl3.add(postman3);
         
         w3.setPostmanList(pl3);
         w3.setPostofficeList(po3);
         
+
+        postman2.setWarehouseID(w2.getWarehouseID());
+        postman3.setWarehouseID(w3.getWarehouseID());
+       
+        em.persist(postman2);
+        em.persist(postman3);
+        
         em.persist(w1);
         em.persist(w2);
         em.persist(w3);
         
-        em.persist(postman1);
-        em.persist(postman2);
-        em.persist(postman3);
+        userTransaction.commit();
+        } catch (Exception e){
+            
+        }
+        
+
+        
         
     }
 }

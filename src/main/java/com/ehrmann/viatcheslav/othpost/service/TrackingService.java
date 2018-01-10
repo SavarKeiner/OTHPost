@@ -24,7 +24,7 @@ import javax.transaction.Transactional;
  */
 @RequestScoped
 public class TrackingService {
-    @PersistenceContext(unitName="com.ehrmann.viatcheslav_OTHPost_war_1.0-SNAPSHOTPU")
+    @PersistenceContext
     private EntityManager em;
     
     
@@ -39,8 +39,8 @@ public class TrackingService {
         t.setTrackingNumber(uuid);
         t.setTrackingStatus(ts);
         
+        
         em.persist(t);
-        em.persist(ts);
         
         return t;
     }
