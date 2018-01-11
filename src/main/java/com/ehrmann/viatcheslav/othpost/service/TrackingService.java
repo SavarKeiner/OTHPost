@@ -35,7 +35,7 @@ public class TrackingService {
         String uuid = UUID.randomUUID().toString();
         
         
-        t.setParcelID(p.getParcelID());
+        t.setParcelObj(p);
         t.setTrackingNumber(uuid);
         t.setTrackingStatus(ts);
         
