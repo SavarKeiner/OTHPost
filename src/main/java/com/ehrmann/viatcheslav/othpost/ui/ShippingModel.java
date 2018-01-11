@@ -12,6 +12,7 @@ import com.ehrmann.viatcheslav.othpost.entity.Tracking;
 import com.ehrmann.viatcheslav.othpost.service.ShippingService;
 import com.ehrmann.viatcheslav.othpost.service.TrackingService;
 import java.io.Serializable;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -173,6 +174,7 @@ public class ShippingModel implements Serializable {
             
             
             ship.shipParcel(c, parcel, tracking);
+            ship.simulateDelivery(parcel);
         }
     }
     

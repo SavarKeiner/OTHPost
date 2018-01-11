@@ -10,6 +10,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 /**
  *
@@ -28,28 +30,12 @@ public class Parcel implements Serializable {
         this.parcelID = parcelID;
     }
 
-    public long getCustomerID() {
-        return customerID;
-    }
-
-    public void setCustomerID(long customerID) {
-        this.customerID = customerID;
-    }
-
     public long getInvoiceID() {
         return invoiceID;
     }
 
     public void setInvoiceID(long invoiceID) {
         this.invoiceID = invoiceID;
-    }
-
-    public long getTrackingID() {
-        return trackingID;
-    }
-
-    public void setTrackingID(long trackingID) {
-        this.trackingID = trackingID;
     }
 
     public String getForename() {
@@ -107,9 +93,8 @@ public class Parcel implements Serializable {
     public void setType(int type) {
         this.type = type;
     }
-    private long customerID;
+    
     private long invoiceID;
-    private long trackingID;
     private String forename;
     private String surename;
     private int postalCode;
@@ -117,4 +102,25 @@ public class Parcel implements Serializable {
     private String street;
     private String streetNumber;
     private int type;
+    
+    @OneToOne
+    private Tracking trackingObj;
+    @ManyToOne
+    private Customer customerObj;
+
+    public Customer getCustomerObj() {
+        return customerObj;
+    }
+
+    public void setCustomerObj(Customer customerObj) {
+        this.customerObj = customerObj;
+    }
+    
+    public Tracking getTrackingObj() {
+        return trackingObj;
+    }
+
+    public void setTrackingObj(Tracking trackingObj) {
+        this.trackingObj = trackingObj;
+    }
 }

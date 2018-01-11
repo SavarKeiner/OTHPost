@@ -12,6 +12,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 /**
  *
@@ -21,9 +23,9 @@ import javax.persistence.Id;
 public class Tracking implements Serializable {
     @GeneratedValue( strategy=GenerationType.AUTO)
     @Id private long trackingID;
-    private long parcelID;
     private String trackingNumber;
     @ElementCollection
+    @OneToMany
     private List<TrackingStatus> trackingStatus;
 
     public long getTrackingID() {
@@ -32,14 +34,6 @@ public class Tracking implements Serializable {
 
     public void setTrackingID(long trackingID) {
         this.trackingID = trackingID;
-    }
-
-    public long getParcelID() {
-        return parcelID;
-    }
-
-    public void setParcelID(long parcelID) {
-        this.parcelID = parcelID;
     }
 
     public String getTrackingNumber() {
@@ -56,5 +50,16 @@ public class Tracking implements Serializable {
 
     public void setTrackingStatus(List<TrackingStatus> trackingStatus) {
         this.trackingStatus = trackingStatus;
+    }
+    
+    @OneToOne(mappedBy="trackingObj")
+    private Parcel parcelObj;
+
+    public Parcel getParcelObj() {
+        return parcelObj;
+    }
+
+    public void setParcelObj(Parcel parcelObj) {
+        this.parcelObj = parcelObj;
     }
 }

@@ -48,26 +48,19 @@ public class ShippingService {
         List<Warehouse> result = q.getResultList();
         
         Collections.shuffle(result);
+        Parcel p1 = em.find(Parcel.class, p.getParcelID());
+        Tracking t = em.find(Tracking.class, p1.getTrackingObj().getTrackingID());
         
         for(Warehouse w : result){
-            //try{
-               //Thread.sleep(10000);
-               //em.getTransaction().begin();
-               
-               p.getTrackingID();
-               Tracking t = em.find(Tracking.class, p.getTrackingID());
                
                TrackingStatus ts = new TrackingStatus();
                ts.setWarehouseID(w.getWarehouseID());
                ts.setStatus("Das Packet ist im Lagerhaus in " + w.getCity() + " angekommen");
+               em.persist(ts);
                
                t.getTrackingStatus().add(ts);
-               
-               em.persist(ts);
-               //em.getTransaction().commit();
-            //} catch(Exception e){
-                //
-            //}
+               em.merge(t);
+
         }        
     }
 
@@ -75,24 +68,26 @@ public class ShippingService {
     public void shipParcel(Customer c, Parcel p, Tracking t){//need invoice
         //em.getTransaction().begin();
 
-
-        p.setCustomerID(c.getCustomerID());
-        p.setTrackingID(t.getTrackingID());
-        
         //p.setCustomerID(c.getCustomerID());
         //p.setTrackingID(t.getTrackingID());
         
-        Parcel p1 = em.find(Parcel.class, p.getParcelID());
-        p1.setCustomerID(c.getCustomerID());
-        p1.setTrackingID(t.getTrackingID());
+        Tracking t1 = em.find(Tracking.class, t.getTrackingID());
+        Customer c1 = em.find(Customer.class, c.getCustomerID());
         
+        Parcel p1 = em.find(Parcel.class, p.getParcelID());
+        em.merge(p1);
+        
+        p1.setCustomerObj(c1);
+        p1.setTrackingObj(t1);
+        
+        em.persist(p1);
 
         //p.setInvoiceID(i.getInvoiceID());
         
         //em.getTransaction().commit();
         
         
-        simulateDelivery(p);
+        //simulateDelivery(p);
         //do shipping
     }
     
@@ -173,7 +168,7 @@ public class ShippingService {
         }
         
         try{
-                    userTransaction.begin();
+        userTransaction.begin();
                 
         List<Postman> pl1 = new ArrayList<Postman>();
         List<Postman> pl2 = new ArrayList<Postman>();

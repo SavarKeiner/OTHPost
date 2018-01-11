@@ -28,17 +28,22 @@ public class TrackingService {
     private EntityManager em;
     
     
+    public List<TrackingStatus> getTest(){
+        TypedQuery<TrackingStatus> q = em.createQuery("SELECT t FROM TrackingStatus as t", TrackingStatus.class);
+        List<TrackingStatus> result = q.getResultList();
+        
+        return result;
+    }
+    
     @Transactional
     public Tracking createTrackingEntry(Parcel p){
         Tracking t = new Tracking();
         List<TrackingStatus> ts = new ArrayList<TrackingStatus>();
         String uuid = UUID.randomUUID().toString();
-        
-        
+
         t.setParcelObj(p);
         t.setTrackingNumber(uuid);
         t.setTrackingStatus(ts);
-        
         
         em.persist(t);
         
