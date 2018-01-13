@@ -12,6 +12,7 @@ import com.ehrmann.viatcheslav.othpost.entity.Postoffice;
 import com.ehrmann.viatcheslav.othpost.entity.Tracking;
 import com.ehrmann.viatcheslav.othpost.entity.TrackingStatus;
 import com.ehrmann.viatcheslav.othpost.entity.Warehouse;
+import com.ehrmann.viatcheslav.othpost.ui.ShippingModel;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -93,7 +94,8 @@ public class ShippingService {
     
     @Transactional
     public Parcel receiveParcel(String recvforename, String recvsurename, 
-            String recvcity, String recvstreet, String recvstreetNumber, int recpostalCode){
+            String recvcity, String recvstreet, String recvstreetNumber, 
+            int recpostalCode, ShippingModel.ParcelType type){
         
         Parcel parcel = new Parcel();
         

@@ -23,7 +23,7 @@ import javax.persistence.TypedQuery;
  * @author Slav
  */
 @Named
-@SessionScoped
+@RequestScoped
 public class TrackingModel implements Serializable {
     @Inject
     private ShippingService ship;
@@ -32,6 +32,16 @@ public class TrackingModel implements Serializable {
     
     private List<TrackingStatus> trackingList;
 
+    private String trackingNumber;
+
+    public String getTrackingNumber() {
+        return trackingNumber;
+    }
+
+    public void setTrackingNumber(String trackingNumber) {
+        this.trackingNumber = trackingNumber;
+    }
+    
     public List<TrackingStatus> getTrackingList() {
         return trackingList;
     }
@@ -40,12 +50,14 @@ public class TrackingModel implements Serializable {
         this.trackingList = trackingList;
     }
     
-    public String test(){
-        //trackingList = trackingService.getTest();
+    public void getParcelStatus(){
+        //trackingList = trackingService.getTrackingStatusList();
         
-        this.setTrackingList(trackingService.getTest());
-        
-        
-        return "tracking.xhtml";
+        if(trackingNumber == null || trackingNumber.equals("")){
+            //return "tracking.xhtml";
+        } else 
+            this.setTrackingList(trackingService.getTrackingStatusList(trackingNumber));
+         
+        //return "tracking.xhtml";
     }
 }

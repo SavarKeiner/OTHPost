@@ -32,18 +32,19 @@
     position: relative;
     background-color: #dddddd;
     padding: 5px;
+    margin: auto;
 }
 
 .left_content {
     background-color: #dddddd;
     padding: 5px;
-    margin-left: 170px;
+    margin: auto;
 }
 
 .right_content {
     background-color: #dddddd;
     padding: 5px;
-    margin: 0px 170px 0px 170px;
+    margin: auto;
 }
 
 #top a:link, #top a:visited {

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import javax.ejb.Asynchronous;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -28,11 +29,16 @@ public class TrackingService {
     private EntityManager em;
     
     
-    public List<TrackingStatus> getTest(){
-        TypedQuery<TrackingStatus> q = em.createQuery("SELECT t FROM TrackingStatus as t", TrackingStatus.class);
-        List<TrackingStatus> result = q.getResultList();
+    @Transactional
+    public List<TrackingStatus> getTrackingStatusList(String trackingNumber){
+        TypedQuery<Tracking> qz = em.createQuery("SELECT t FROM Tracking as t WHERE t.trackingNumber = :number", Tracking.class);
+        qz.setParameter("number", trackingNumber);
+        List<Tracking> trackingResult = qz.getResultList();
         
-        return result;
+        if(!trackingResult.isEmpty())
+            return trackingResult.get(0).getTrackingStatus();
+        else
+            return null;
     }
     
     @Transactional

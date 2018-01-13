@@ -12,6 +12,9 @@ import com.ehrmann.viatcheslav.othpost.entity.Tracking;
 import com.ehrmann.viatcheslav.othpost.service.ShippingService;
 import com.ehrmann.viatcheslav.othpost.service.TrackingService;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -178,7 +181,29 @@ public class ShippingModel implements Serializable {
     private String recvpostalcode= "";
     
     public enum ParcelType {
-        letter, smallParcel, bigParcel 
+        Brief, Packet, Palette 
+    }
+    
+    private ParcelType typeParcel;
+
+    public ParcelType getTypeParcel() {
+        return typeParcel;
+    }
+
+    public void setTypeParcel(ParcelType typeParcel) {
+        this.typeParcel = typeParcel;
+    }
+    
+    private List<ParcelType> parcelTypeList = Arrays.asList(ParcelType.Brief, ParcelType.Packet, ParcelType.Palette);
+
+    @WebMethod(exclude = true)
+    public List<ParcelType> getParcelTypeList() {
+        return parcelTypeList;
+    }
+
+    @WebMethod(exclude = true)
+    public void setParcelTypeList(List<ParcelType> parcelTypeList) {
+        this.parcelTypeList = parcelTypeList;
     }
     
     @WebMethod(exclude = true)
@@ -203,7 +228,7 @@ public class ShippingModel implements Serializable {
                     sendcity, sendstreet, sendstreetNumber, sendiban, Integer.parseInt(sendpostalcode));
             }
             
-            Parcel parcel = ship.receiveParcel(recvforename, recvsurename, recvcity, recvstreet, recvstreetNumber, Integer.parseInt(sendpostalcode));
+            Parcel parcel = ship.receiveParcel(recvforename, recvsurename, recvcity, recvstreet, recvstreetNumber, Integer.parseInt(sendpostalcode), typeParcel);
             Tracking tracking = trackingService.createTrackingEntry(parcel);
             //createInvoice
             

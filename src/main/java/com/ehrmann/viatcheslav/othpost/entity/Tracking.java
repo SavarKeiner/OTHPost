@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.List;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,7 +26,7 @@ public class Tracking implements Serializable {
     @Id private long trackingID;
     private String trackingNumber;
     @ElementCollection
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval=true)
     private List<TrackingStatus> trackingStatus;
 
     public long getTrackingID() {
