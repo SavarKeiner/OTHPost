@@ -10,6 +10,7 @@ import com.ehrmann.viatcheslav.othpost.entity.Warehouse;
 import com.ehrmann.viatcheslav.othpost.service.ShippingService;
 import com.ehrmann.viatcheslav.othpost.service.TrackingService;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
@@ -39,7 +40,12 @@ public class TrackingModel implements Serializable {
         this.trackingList = trackingList;
     }
     
-    public void test(){
-        trackingList = trackingService.getTest();
+    public String test(){
+        //trackingList = trackingService.getTest();
+        
+        this.setTrackingList(trackingService.getTest());
+        
+        
+        return "tracking.xhtml";
     }
 }
