@@ -5,7 +5,7 @@
  */
 package com.ehrmann.viatcheslav.othpost.ui;
 
-import com.ehrmann.viatcheslav.othpost.ui.ShippingModel.ParcelType;
+import com.ehrmann.viatcheslav.othpost.entity.Invoice.ParcelType;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -20,9 +20,7 @@ public class ParcelTypeConverter implements Converter {
     
     
     @Override
-    public Object getAsObject(FacesContext context, UIComponent component, String value) {
-        ParcelType type;
-                
+    public Object getAsObject(FacesContext context, UIComponent component, String value) {                
         if(value==null)
             return "";
         

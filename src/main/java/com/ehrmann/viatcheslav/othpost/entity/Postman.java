@@ -10,32 +10,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 /**
  *
  * @author Viatcheslav Ehrmann
  */
 @Entity
-public class Postman implements Serializable {
-    @GeneratedValue( strategy=GenerationType.AUTO)
-    @Id private long postmanID;
-
-    public long getPostmanID() {
-        return postmanID;
-    }
-
-    public void setPostmanID(long postmanID) {
-        this.postmanID = postmanID;
-    }
-
-    public long getWarehouseID() {
-        return warehouseID;
-    }
-
-    public void setWarehouseID(long warehouseID) {
-        this.warehouseID = warehouseID;
-    }
-
+public class Postman extends LongIdEntity {
     public long getEmplyoeeNumber() {
         return emplyoeeNumber;
     }
@@ -83,7 +65,17 @@ public class Postman implements Serializable {
     public void setStreetNumber(String streetNumber) {
         this.streetNumber = streetNumber;
     }
-    private long warehouseID;
+    
+    public Warehouse getEmploymentWarehouse() {
+        return employmentWarehouse;
+    }
+
+    public void setEmploymentWarehouse(Warehouse employmentWarehouse) {
+        this.employmentWarehouse = employmentWarehouse;
+    }
+    
+    @ManyToOne
+    private Warehouse employmentWarehouse;
     private long emplyoeeNumber;
     private String forename;
     private String surename;

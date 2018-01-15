@@ -6,6 +6,7 @@
 package com.ehrmann.viatcheslav.othpost.service;
 
 import com.ehrmann.viatcheslav.othpost.entity.Customer;
+import com.ehrmann.viatcheslav.othpost.entity.Invoice;
 import com.ehrmann.viatcheslav.othpost.entity.Parcel;
 import com.ehrmann.viatcheslav.othpost.entity.Postman;
 import com.ehrmann.viatcheslav.othpost.entity.Postoffice;
@@ -44,25 +45,43 @@ public class ShippingService {
     private UserTransaction userTransaction;
  
     @Transactional
-    public void simulateDelivery(Parcel p){
+    public void simulateDelivery(Customer c, Parcel p){
         TypedQuery<Warehouse> q = em.createQuery("SELECT w FROM Warehouse as w", Warehouse.class);
         List<Warehouse> result = q.getResultList();
         
         Collections.shuffle(result);
-        Parcel p1 = em.find(Parcel.class, p.getParcelID());
-        Tracking t = em.find(Tracking.class, p1.getTrackingObj().getTrackingID());
+        Parcel p1 = em.find(Parcel.class, p.getId());
+        Tracking t = em.find(Tracking.class, p1.getTrackingObj().getId());
+        
+        Postoffice office = new Postoffice();
+        office.setCity(c.getCity());
+        office.setPostalcode(c.getPostalcode());
+        office.setStreet(c.getStreet());
+        em.persist(office);
+ 
+        TrackingStatus tsf = new TrackingStatus();
+        tsf.setStatus("Das Packet wurde an der Annahmestelle " + c.getCity() + " " + c.getStreet() + " angenommen");
+        em.persist(tsf);
+        t.getTrackingStatus().add(tsf);
+        em.merge(t);
         
         for(Warehouse w : result){
                
                TrackingStatus ts = new TrackingStatus();
-               ts.setWarehouseID(w.getWarehouseID());
+               ts.setWarehouse(w);
                ts.setStatus("Das Packet ist im Lagerhaus in " + w.getCity() + " angekommen");
                em.persist(ts);
                
                t.getTrackingStatus().add(ts);
                em.merge(t);
 
-        }        
+        }   
+        
+        TrackingStatus tse = new TrackingStatus();
+        tse.setStatus("Das Packet zugestellt an: " + p.getCity() + " " + p.getStreet() + " " + p.getStreetNumber());
+        em.persist(tse);
+        t.getTrackingStatus().add(tse);
+        em.merge(t);
     }
 
     @Transactional
@@ -72,10 +91,10 @@ public class ShippingService {
         //p.setCustomerID(c.getCustomerID());
         //p.setTrackingID(t.getTrackingID());
         
-        Tracking t1 = em.find(Tracking.class, t.getTrackingID());
-        Customer c1 = em.find(Customer.class, c.getCustomerID());
+        Tracking t1 = em.find(Tracking.class, t.getId());
+        Customer c1 = em.find(Customer.class, c.getId());
         
-        Parcel p1 = em.find(Parcel.class, p.getParcelID());
+        Parcel p1 = em.find(Parcel.class, p.getId());
         em.merge(p1);
         
         p1.setCustomerObj(c1);
@@ -83,7 +102,6 @@ public class ShippingService {
         
         em.persist(p1);
 
-        //p.setInvoiceID(i.getInvoiceID());
         
         //em.getTransaction().commit();
         
@@ -95,7 +113,7 @@ public class ShippingService {
     @Transactional
     public Parcel receiveParcel(String recvforename, String recvsurename, 
             String recvcity, String recvstreet, String recvstreetNumber, 
-            int recpostalCode, ShippingModel.ParcelType type){
+            int recpostalCode, Invoice.ParcelType type){
         
         Parcel parcel = new Parcel();
         
@@ -105,6 +123,11 @@ public class ShippingService {
         parcel.setStreet(recvstreet);
         parcel.setStreetNumber(recvstreetNumber);
         parcel.setPostalCode(recpostalCode);
+        
+        parcel.setInvoice(new Invoice());
+        parcel.getInvoice().setPrice(0.0f);
+        parcel.getInvoice().setPaymentDateTime("jetzt");
+        parcel.getInvoice().setParcelType(type);
         
         em.persist(parcel);
         
@@ -200,11 +223,7 @@ public class ShippingService {
         postman1.setStreetNumber("3c");
         postman1.setEmplyoeeNumber(1);
         
-        postman1.setWarehouseID(w1.getWarehouseID());
-        em.persist(postman1);
-        
         pl1.add(postman1);
-        
         
         w1.setPostmanList(pl1);
         w1.setPostofficeList(po1);
@@ -245,10 +264,12 @@ public class ShippingService {
         w3.setPostmanList(pl3);
         w3.setPostofficeList(po3);
         
-
-        postman2.setWarehouseID(w2.getWarehouseID());
-        postman3.setWarehouseID(w3.getWarehouseID());
+        postman1.setEmploymentWarehouse(w1);
+        postman2.setEmploymentWarehouse(w2);
+        postman3.setEmploymentWarehouse(w3);
        
+                
+        em.persist(postman1);
         em.persist(postman2);
         em.persist(postman3);
         

@@ -7,14 +7,20 @@ package com.ehrmann.viatcheslav.othpost.ui;
 
 
 import com.ehrmann.viatcheslav.othpost.entity.Customer;
+import com.ehrmann.viatcheslav.othpost.entity.Invoice;
+import com.ehrmann.viatcheslav.othpost.entity.Invoice.ParcelType;
 import com.ehrmann.viatcheslav.othpost.entity.Parcel;
 import com.ehrmann.viatcheslav.othpost.entity.Tracking;
+import com.ehrmann.viatcheslav.othpost.service.LoggerIF;
+import com.ehrmann.viatcheslav.othpost.service.LoggerType;
+import com.ehrmann.viatcheslav.othpost.service.Loggers;
 import com.ehrmann.viatcheslav.othpost.service.ShippingService;
 import com.ehrmann.viatcheslav.othpost.service.TrackingService;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -28,13 +34,21 @@ import javax.jws.WebService;
  */
 @WebService
 @Named
-@SessionScoped
+@RequestScoped
 public class ShippingModel implements Serializable {
     @Inject
     private ShippingService ship;
     @Inject
     private TrackingService trackingService;
 
+    @Inject
+    @Loggers(LoggerType.Web)
+    private LoggerIF weblogger;
+    
+    @Inject
+    @Loggers(LoggerType.Remote)
+    private LoggerIF remotelogger;
+    
     @WebMethod(exclude = true)
     public String getSendforename() {
         return sendforename;
@@ -180,9 +194,16 @@ public class ShippingModel implements Serializable {
     private String recvstreetNumber= "";
     private String recvpostalcode= "";
     
-    public enum ParcelType {
-        Brief, Packet, Palette 
+    private String parcelTrackingNumber = "";
+
+    public String getParcelTrackingNumber() {
+        return parcelTrackingNumber;
     }
+
+    public void setParcelTrackingNumber(String parcelTrackingNumber) {
+        this.parcelTrackingNumber = parcelTrackingNumber;
+    }
+    
     
     private ParcelType typeParcel;
 
@@ -194,7 +215,7 @@ public class ShippingModel implements Serializable {
         this.typeParcel = typeParcel;
     }
     
-    private List<ParcelType> parcelTypeList = Arrays.asList(ParcelType.Brief, ParcelType.Packet, ParcelType.Palette);
+    private List<Invoice.ParcelType> parcelTypeList = Arrays.asList(ParcelType.Brief, ParcelType.Packet, ParcelType.Palette);
 
     @WebMethod(exclude = true)
     public List<ParcelType> getParcelTypeList() {
@@ -204,17 +225,6 @@ public class ShippingModel implements Serializable {
     @WebMethod(exclude = true)
     public void setParcelTypeList(List<ParcelType> parcelTypeList) {
         this.parcelTypeList = parcelTypeList;
-    }
-    
-    @WebMethod(exclude = true)
-    public void doTest(){
-        
-        //ship.createTempUser("max", "musterman", "regensburg", "landshuterstraße", "1a", "5678-1234", 93050);
-        //System.out.println("dbg-2");
-        
-        //ship.isUserExsiting("max", "musterman", "regensburg", "landshuterstraße", "1a", "5678-1234", 93050);
-        
-        //this.setName("14212");
     }
     
     @WebMethod(exclude = true)
@@ -232,10 +242,12 @@ public class ShippingModel implements Serializable {
             Tracking tracking = trackingService.createTrackingEntry(parcel);
             //createInvoice
             
-            
-            
+            setParcelTrackingNumber(tracking.getTrackingNumber());
             ship.shipParcel(c, parcel, tracking);
-            ship.simulateDelivery(parcel);
+              
+            weblogger.logOrder("order created through website with id: " + parcel.getId());
+            
+            ship.simulateDelivery(c, parcel);
         }
     }
     
@@ -252,8 +264,24 @@ public class ShippingModel implements Serializable {
 
     @WebMethod
     public boolean shipRemote(Customer sender, Customer receiver, ParcelType type) {
-        if("max".equals(receiver.getForename()))
-            return false;
+        Customer c = ship.isCustomerExsiting(sendforename, sendsurename, 
+                    sendcity, sendstreet, sendstreetNumber, sendiban, Integer.parseInt(sendpostalcode));
+            
+        if(c == null){
+            c = ship.createCustomer(sendforename, sendsurename, 
+                sendcity, sendstreet, sendstreetNumber, sendiban, Integer.parseInt(sendpostalcode));
+        }
+            
+        Parcel parcel = ship.receiveParcel(recvforename, recvsurename, recvcity, recvstreet, recvstreetNumber, Integer.parseInt(sendpostalcode), typeParcel);
+        Tracking tracking = trackingService.createTrackingEntry(parcel);
+        //createInvoice
+            
+        setParcelTrackingNumber(tracking.getTrackingNumber());
+        ship.shipParcel(c, parcel, tracking);
+              
+        remotelogger.logOrder("order created through website with id: " + parcel.getId());
+            
+        ship.simulateDelivery(c, parcel);
         
         return true;
     }

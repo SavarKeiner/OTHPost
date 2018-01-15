@@ -17,18 +17,7 @@ import javax.persistence.Id;
  * @author Viatcheslav Ehrmann
  */
 @Entity
-public class Customer implements Serializable {
-    @GeneratedValue( strategy=GenerationType.AUTO)
-    @Id private long customerID;
-
-    public long getCustomerID() {
-        return customerID;
-    }
-
-    public void setCustomerID(long customerID) {
-        this.customerID = customerID;
-    }
-
+public class Customer extends LongIdEntity {
     public String getForename() {
         return forename;
     }

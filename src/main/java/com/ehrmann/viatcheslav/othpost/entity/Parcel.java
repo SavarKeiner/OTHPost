@@ -5,11 +5,8 @@
  */
 package com.ehrmann.viatcheslav.othpost.entity;
 
-import java.io.Serializable;
+
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
@@ -18,26 +15,7 @@ import javax.persistence.OneToOne;
  * @author Viatcheslav Ehrmann
  */
 @Entity
-public class Parcel implements Serializable {
-    @GeneratedValue( strategy=GenerationType.AUTO)
-    @Id private long parcelID;
-
-    public long getParcelID() {
-        return parcelID;
-    }
-
-    public void setParcelID(long parcelID) {
-        this.parcelID = parcelID;
-    }
-
-    public long getInvoiceID() {
-        return invoiceID;
-    }
-
-    public void setInvoiceID(long invoiceID) {
-        this.invoiceID = invoiceID;
-    }
-
+public class Parcel extends LongIdEntity {
     public String getForename() {
         return forename;
     }
@@ -94,7 +72,7 @@ public class Parcel implements Serializable {
         this.type = type;
     }
     
-    private long invoiceID;
+    private Invoice invoice;
     private String forename;
     private String surename;
     private int postalCode;
@@ -108,6 +86,14 @@ public class Parcel implements Serializable {
     @ManyToOne
     private Customer customerObj;
 
+    public Invoice getInvoice() {
+        return invoice;
+    }
+
+    public void setInvoice(Invoice invoice) {
+        this.invoice = invoice;
+    }
+    
     public Customer getCustomerObj() {
         return customerObj;
     }

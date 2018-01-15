@@ -7,6 +7,7 @@ package com.ehrmann.viatcheslav.othpost.entity;
 
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -21,21 +22,11 @@ import javax.persistence.OneToOne;
  * @author Slav
  */
 @Entity
-public class Tracking implements Serializable {
-    @GeneratedValue( strategy=GenerationType.AUTO)
-    @Id private long trackingID;
+public class Tracking extends LongIdEntity {
     private String trackingNumber;
     @ElementCollection
-    @OneToMany(fetch = FetchType.EAGER, orphanRemoval=true)
+    @OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.PERSIST, orphanRemoval=true)
     private List<TrackingStatus> trackingStatus;
-
-    public long getTrackingID() {
-        return trackingID;
-    }
-
-    public void setTrackingID(long trackingID) {
-        this.trackingID = trackingID;
-    }
 
     public String getTrackingNumber() {
         return trackingNumber;

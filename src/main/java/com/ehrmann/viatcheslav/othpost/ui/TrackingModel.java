@@ -25,8 +25,8 @@ import javax.persistence.TypedQuery;
 @Named
 @RequestScoped
 public class TrackingModel implements Serializable {
-    @Inject
-    private ShippingService ship;
+    //@Inject
+    //private ShippingService ship;
     @Inject
     private TrackingService trackingService;
     

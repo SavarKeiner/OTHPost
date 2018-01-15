@@ -10,24 +10,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 /**
  *
  * @author Slav
  */
 @Entity
-public class TrackingStatus implements Serializable {
-    @GeneratedValue( strategy=GenerationType.AUTO)
-    @Id private long trackingStatusID;
-
-    public long getTrackingStatusID() {
-        return trackingStatusID;
-    }
-
-    public void setTrackingStatusID(long trackingID) {
-        this.trackingStatusID = trackingID;
-    }
-
+public class TrackingStatus extends LongIdEntity {
     public String getStatus() {
         return status;
     }
@@ -44,15 +34,16 @@ public class TrackingStatus implements Serializable {
         this.timestamp = timestamp;
     }
     
-    public long getWarehouseID() {
-        return warehouseID;
+    public Warehouse getWarehouse() {
+        return warehouse;
     }
 
-    public void setWarehouseID(long warehouseID) {
-        this.warehouseID = warehouseID;
+    public void setWarehouse(Warehouse warehouse) {
+        this.warehouse = warehouse;
     }
     
     private String status;
     private String timestamp;
-    private long warehouseID;
+    @OneToOne
+    private Warehouse warehouse;
 }

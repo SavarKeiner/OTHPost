@@ -6,7 +6,7 @@
 package com.ehrmann.viatcheslav.othpost.entity;
 
 import java.io.Serializable;
-import javax.persistence.Entity;
+import javax.persistence.Embeddable;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,13 +15,34 @@ import javax.persistence.Id;
  *
  * @author Viatcheslav Ehrmann
  */
-@Entity
+@Embeddable
 public class Invoice implements Serializable {
-    @GeneratedValue( strategy=GenerationType.AUTO)
-    @Id private long invoiceID;
-    private long parcelID;
+    public float getPrice() {
+        return price;
+    }
+
+    public void setPrice(float price) {
+        this.price = price;
+    }
+
+    public String getPaymentDateTime() {
+        return paymentDateTime;
+    }
+
+    public void setPaymentDateTime(String paymentDateTime) {
+        this.paymentDateTime = paymentDateTime;
+    }
+    
+    public ParcelType getParcelType() {
+        return parcelType;
+    }
+
+    public void setParcelType(ParcelType parcelType) {
+        this.parcelType = parcelType;
+    }
+   
+    public enum ParcelType {Brief, Packet, Palette};
+    private ParcelType parcelType;
     private float price;
-    private int parcelType;
-    private String creationDateTime;
     private String paymentDateTime;
 }

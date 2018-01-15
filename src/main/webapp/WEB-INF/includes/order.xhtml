@@ -60,7 +60,7 @@
             </h:panelGrid>
             
             <h:commandButton value = "Packet Versenden" onclick = "#{shippingModel.createOrder()}" /> 
-            
+            <h:outputLabel value ="#{shippingModel.parcelTrackingNumber}"/>
             <!--<label><b>Email</b></label>
             <h:inputText id="email"/>
 

@@ -10,27 +10,18 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 /**
  *
  * @author Viatcheslav Ehrmann
  */
 @Entity
-public class Warehouse implements Serializable {
-    @GeneratedValue( strategy=GenerationType.AUTO)
-    @Id private long warehouseID;
-
-    public long getWarehouseID() {
-        return warehouseID;
-    }
-
-    public void setWarehouseID(long warehouseID) {
-        this.warehouseID = warehouseID;
-    }
-
+public class Warehouse extends LongIdEntity {
     public String getStreet() {
         return street;
     }
@@ -85,7 +76,9 @@ public class Warehouse implements Serializable {
     private int postalcode;
     
     @ElementCollection
+    @OneToMany(orphanRemoval=true, mappedBy="contractWarehouse")
     private List<Postoffice> postofficeList;
     @ElementCollection
+    @OneToMany(orphanRemoval=true, mappedBy="employmentWarehouse")
     private List<Postman> postmanList;
 }
