@@ -9,7 +9,11 @@
     </h:head>
     <h:body>
         <h:form>
-
+            <div class="topmenu">
+                <h:button value="Order" outcome="order.xhtml" />
+                <h:button value="Tracking" outcome="tracking.xhtml" /> 
+            </div>
+            
         <div class="container">
             <h:panelGrid id = "panel1" columns = "4" cellpadding = "10" cellspacing = "1">
             
@@ -58,9 +62,7 @@
             </h:panelGrid>                
                             
             </h:panelGrid>
-            
             <h:commandButton value = "Packet Versenden" onclick = "#{shippingModel.createOrder()}" /> 
-            <h:outputLabel value ="#{shippingModel.parcelTrackingNumber}"/>
             <!--<label><b>Email</b></label>
             <h:inputText id="email"/>
 
@@ -69,8 +71,14 @@
 
             <label><b>Repeat Password</b></label>
             <h:inputText id="psw-repeat"/>-->
-        </div>
+        </div>            
+        </h:form>
         
+        <h:form>
+            <div>
+            <h:outputLabel value ="ihre Paketverfolgungsnummer: "/>
+            <h:outputLabel value ="#{shippingModel.parcelTrackingNumber}"/>
+            </div>
         </h:form>
     </h:body>
 </html>

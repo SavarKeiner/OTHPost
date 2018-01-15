@@ -6,6 +6,10 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets">   
     <h:body>
         <h:form>
+            <div class="topmenu">
+                <h:button value="Order" outcome="order.xhtml" />
+                <h:button value="Tracking" outcome="tracking.xhtml" /> 
+            </div>
             
             <h:outputLabel value = "Geben sie ihre Packetverfolgungsnummer ein" />
             <h:inputText value="#{trackingModel.trackingNumber}" />
