@@ -13,20 +13,16 @@ import com.ehrmann.viatcheslav.othpost.entity.Postoffice;
 import com.ehrmann.viatcheslav.othpost.entity.Tracking;
 import com.ehrmann.viatcheslav.othpost.entity.TrackingStatus;
 import com.ehrmann.viatcheslav.othpost.entity.Warehouse;
-import com.ehrmann.viatcheslav.othpost.ui.ShippingModel;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Resource;
-import javax.ejb.Asynchronous;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
+import javax.jws.WebMethod;
+import javax.jws.WebService;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import javax.transaction.UserTransaction;
@@ -35,7 +31,7 @@ import javax.transaction.UserTransaction;
  *
  * @author Slav
  */
-
+@WebService
 @RequestScoped
 public class ShippingService {
     @PersistenceContext
@@ -43,7 +39,121 @@ public class ShippingService {
     
     @Resource
     private UserTransaction userTransaction;
- 
+    
+    @WebMethod
+    @Transactional
+    public TrackingRemoteResponse shipRemote(Customer sender, Customer receiver, Invoice.ParcelType type) {
+        Customer customerFromDB = isCustomerExisting(sender);
+        
+        if(customerFromDB == null){
+            customerFromDB = createCustomerRemote(sender);
+        }
+        
+        //createInvoiceHere
+        Parcel p = receiveParcelRemote(receiver, type);
+        Tracking tracking = createTrackingEntryRemote(p);
+        
+        shipParcel(sender, p, tracking);
+        
+        simulateDelivery(customerFromDB, p);
+        
+        Tracking forTrackingResponse = em.find(Tracking.class, tracking.getId());
+        TrackingRemoteResponse response = new TrackingRemoteResponse();
+        response.statusList = new ArrayList<String>();
+        response.trackingNumber = tracking.getTrackingNumber();
+        
+        for(TrackingStatus status : forTrackingResponse.getTrackingStatus()){
+            response.statusList.add(status.getStatus());
+        }
+        
+        
+        
+        /*Customer c = ship.isCustomerExsiting(sendforename, sendsurename, 
+                    sendcity, sendstreet, sendstreetNumber, sendiban, Integer.parseInt(sendpostalcode));
+        
+        if(c == null){
+            c = ship.createCustomer(sendforename, sendsurename, 
+                sendcity, sendstreet, sendstreetNumber, sendiban, Integer.parseInt(sendpostalcode));
+        }
+            
+        Parcel parcel = ship.receiveParcel(recvforename, recvsurename, recvcity, recvstreet, recvstreetNumber, Integer.parseInt(sendpostalcode), typeParcel);
+        
+        
+        Tracking tracking = trackingService.createTrackingEntry(parcel);
+            
+        ship.shipParcel(c, parcel, tracking);
+              
+        remotelogger.logOrder("order created through website with id: " + parcel.getId());
+            
+        ship.simulateDelivery(c, parcel);*/
+        
+        return response;
+    }
+    
+    @WebMethod(exclude=true)
+    @Transactional
+    public Tracking createTrackingEntryRemote(Parcel p){
+        Tracking t = new Tracking();
+        List<TrackingStatus> ts = new ArrayList<TrackingStatus>();
+        String uuid = UUID.randomUUID().toString();
+        
+        Parcel pd = em.find(Parcel.class, p.getId());   
+        
+        t.setParcelObj(pd);
+        t.setTrackingNumber(uuid);
+        t.setTrackingStatus(ts);
+        
+        em.persist(t);
+        
+        return t;
+    }
+    
+    @WebMethod(exclude = true)
+    @Transactional
+    public Parcel receiveParcelRemote(Customer receiver, Invoice.ParcelType parcelType){
+        Parcel p = new Parcel();
+        
+        p.setForename(receiver.getForename());
+        p.setSurename(receiver.getSurename());
+        p.setCity(receiver.getCity());
+        p.setPostalCode(receiver.getPostalcode());
+        p.setStreet(receiver.getStreet());
+        p.setStreetNumber(receiver.getStreetNumber());
+        
+        //set real invoice here
+        p.setInvoice(new Invoice());
+        p.getInvoice().setPrice(0.0f);
+        p.getInvoice().setPaymentDateTime("jetzt");
+        p.getInvoice().setParcelType(parcelType);
+
+        em.persist(p);
+        
+        return p;
+    }
+    
+    @WebMethod(exclude = true)
+    @Transactional
+    public Customer createCustomerRemote(Customer sender){
+        try{
+            
+        Customer c = new Customer();
+        c.setForename(sender.getForename());
+        c.setSurename(sender.getSurename());
+        c.setCity(sender.getCity());
+        c.setPostalcode(sender.getPostalcode());
+        c.setStreet(sender.getStreet());
+        c.setStreetNumber(sender.getStreetNumber());
+        c.setIban(sender.getIban());
+        
+        em.persist(c);
+        return c;
+        } catch (Exception e){
+            System.out.println("dbg-1: " + e.getMessage() + " |0| " + e.getStackTrace());
+        }
+        return null;
+    }
+    
+    @WebMethod(exclude = true)
     @Transactional
     public void simulateDelivery(Customer c, Parcel p){
         TypedQuery<Warehouse> q = em.createQuery("SELECT w FROM Warehouse as w", Warehouse.class);
@@ -52,15 +162,16 @@ public class ShippingService {
         Collections.shuffle(result);
         Parcel p1 = em.find(Parcel.class, p.getId());
         Tracking t = em.find(Tracking.class, p1.getTrackingObj().getId());
+        Customer c1 = em.find(Customer.class, c.getId());
         
         Postoffice office = new Postoffice();
-        office.setCity(c.getCity());
-        office.setPostalcode(c.getPostalcode());
-        office.setStreet(c.getStreet());
+        office.setCity(c1.getCity());
+        office.setPostalcode(c1.getPostalcode());
+        office.setStreet(c1.getStreet());
         em.persist(office);
  
         TrackingStatus tsf = new TrackingStatus();
-        tsf.setStatus("Das Packet wurde an der Annahmestelle " + c.getCity() + " " + c.getStreet() + " angenommen");
+        tsf.setStatus("Das Packet wurde an der Annahmestelle " + c1.getCity() + " " + c1.getStreet() + " angenommen");
         em.persist(tsf);
         t.getTrackingStatus().add(tsf);
         em.merge(t);
@@ -78,38 +189,28 @@ public class ShippingService {
         }   
         
         TrackingStatus tse = new TrackingStatus();
-        tse.setStatus("Das Packet zugestellt an: " + p.getCity() + " " + p.getStreet() + " " + p.getStreetNumber());
+        tse.setStatus("Das Packet wurde zugestellt an: " + p.getCity() + " " + p.getStreet() + " " + p.getStreetNumber());
         em.persist(tse);
         t.getTrackingStatus().add(tse);
         em.merge(t);
     }
 
+    @WebMethod(exclude = true)
     @Transactional
     public void shipParcel(Customer c, Parcel p, Tracking t){//need invoice
-        //em.getTransaction().begin();
-
-        //p.setCustomerID(c.getCustomerID());
-        //p.setTrackingID(t.getTrackingID());
-        
         Tracking t1 = em.find(Tracking.class, t.getId());
         Customer c1 = em.find(Customer.class, c.getId());
-        
         Parcel p1 = em.find(Parcel.class, p.getId());
+        
         em.merge(p1);
         
         p1.setCustomerObj(c1);
         p1.setTrackingObj(t1);
         
         em.persist(p1);
-
-        
-        //em.getTransaction().commit();
-        
-        
-        //simulateDelivery(p);
-        //do shipping
     }
     
+    @WebMethod(exclude = true)
     @Transactional
     public Parcel receiveParcel(String recvforename, String recvsurename, 
             String recvcity, String recvstreet, String recvstreetNumber, 
@@ -134,6 +235,7 @@ public class ShippingService {
         return parcel;
     }
     
+    @WebMethod(exclude = true)
     @Transactional
     public Customer createCustomer(String forename, String surename, String city, 
             String street, String streetNumber, String iban, int postalcode){
@@ -152,7 +254,24 @@ public class ShippingService {
         return c;
     }
 
+    @WebMethod(exclude = true)
+    public Customer isCustomerExisting(Customer c){
+        TypedQuery<Customer> q = em.createQuery("SELECT ca FROM Customer as ca WHERE ca.forename = :forename AND ca.surename = :surename AND ca.city = :city AND ca.street = :street AND ca.streetNumber = :streetNumber AND ca.iban = :iban", Customer.class);
+        q.setParameter("forename", c.getForename());
+        q.setParameter("surename", c.getSurename());
+        q.setParameter("city", c.getCity());
+        q.setParameter("street", c.getStreet());
+        q.setParameter("streetNumber", c.getStreetNumber());
+        q.setParameter("iban", c.getIban());
+        
+        List<Customer> result = q.getResultList();
+        if(result.isEmpty())
+           return null;
+        else 
+           return result.get(0);
+    }
     
+    @WebMethod(exclude = true)
     public Customer isCustomerExsiting(String forename, String surename, String city, 
             String street, String streetNumber, String iban, int postalcode){
         TypedQuery<Customer> q = em.createQuery("SELECT ca FROM Customer as ca WHERE ca.forename = :forename AND ca.surename = :surename AND ca.city = :city AND ca.street = :street AND ca.streetNumber = :streetNumber AND ca.iban = :iban", Customer.class);
@@ -174,6 +293,7 @@ public class ShippingService {
        
     }
     
+    @WebMethod(exclude = true)
     private void isInitWarehouse(){
         TypedQuery<Warehouse> q = em.createQuery("SELECT w FROM Warehouse as w", Warehouse.class);
         List<Warehouse> result = q.getResultList();    
@@ -183,6 +303,7 @@ public class ShippingService {
         }
     }
     
+    @WebMethod(exclude = true)
     @Transactional
     private void initWarehouse(){
         TypedQuery<Warehouse> q = em.createQuery("SELECT w FROM Warehouse as w", Warehouse.class);
