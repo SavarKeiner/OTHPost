@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://services/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http" name="TransaktionServiceService" targetNamespace="http://services/">
+  <wsdl:types>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://services/" attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://services/">
+  <xs:element name="ueberweise" type="tns:ueberweise"/>
+  <xs:element name="ueberweiseResponse" type="tns:ueberweiseResponse"/>
+  <xs:complexType name="ueberweise">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="arg0" type="tns:transaktion"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="transaktion">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="buchungsTag" type="xs:dateTime"/>
+      <xs:element name="cent" type="xs:int"/>
+      <xs:element minOccurs="0" name="empfaenger" type="tns:konto"/>
+      <xs:element name="euro" type="xs:int"/>
+      <xs:element minOccurs="0" name="id" type="xs:long"/>
+      <xs:element minOccurs="0" name="sender" type="tns:konto"/>
+      <xs:element minOccurs="0" name="verwendungszweck" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="konto">
+    <xs:sequence>
+      <xs:element name="ecKarteGewuenscht" type="xs:boolean"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="ecKarten" nillable="true" type="tns:ecKarte"/>
+      <xs:element minOccurs="0" name="id" type="xs:long"/>
+      <xs:element minOccurs="0" name="kontoName" type="xs:string"/>
+      <xs:element name="saldo" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ecKarte">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="id" type="xs:long"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ueberweiseResponse">
+    <xs:sequence/>
+  </xs:complexType>
+  <xs:element name="TransaktionFailedException" type="tns:TransaktionFailedException"/>
+  <xs:complexType name="TransaktionFailedException">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="message" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="ueberweiseResponse">
+    <wsdl:part element="tns:ueberweiseResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="ueberweise">
+    <wsdl:part element="tns:ueberweise" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="TransaktionFailedException">
+    <wsdl:part element="tns:TransaktionFailedException" name="TransaktionFailedException">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="TransaktionService">
+    <wsdl:operation name="ueberweise">
+      <wsdl:input message="tns:ueberweise" name="ueberweise">
+    </wsdl:input>
+      <wsdl:output message="tns:ueberweiseResponse" name="ueberweiseResponse">
+    </wsdl:output>
+      <wsdl:fault message="tns:TransaktionFailedException" name="TransaktionFailedException">
+    </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="TransaktionServiceServiceSoapBinding" type="tns:TransaktionService">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="ueberweise">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="ueberweise">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="ueberweiseResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="TransaktionFailedException">
+        <soap:fault name="TransaktionFailedException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="TransaktionServiceService">
+    <wsdl:port binding="tns:TransaktionServiceServiceSoapBinding" name="TransaktionServicePort">
+      <soap:address location="http://im-lamport:8080/huberbank-1.0-SNAPSHOT/TransaktionService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

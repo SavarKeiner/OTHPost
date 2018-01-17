@@ -10,11 +10,13 @@
                 <h:button value="Order" outcome="order.xhtml" />
                 <h:button value="Tracking" outcome="tracking.xhtml" /> 
             </div>
-            
+
             <h:outputLabel value = "Geben sie ihre Packetverfolgungsnummer ein" />
-            <h:inputText value="#{trackingModel.trackingNumber}" />
+            <h:inputText value="#{trackingModel.trackingNumber}"
+                         required="true" 
+                         requiredMessage="Straßennummer darf nicht leer sein"/>
             <h:commandButton value = "Senden" onclick = "#{trackingModel.getParcelStatus()}" /> 
-            
+
             <h:dataTable value = "#{trackingModel.trackingList}" var = "trackingStatus">
 
                 <h:column>    				

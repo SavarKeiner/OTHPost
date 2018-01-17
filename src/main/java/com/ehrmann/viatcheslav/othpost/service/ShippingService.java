@@ -13,6 +13,7 @@ import com.ehrmann.viatcheslav.othpost.entity.Postoffice;
 import com.ehrmann.viatcheslav.othpost.entity.Tracking;
 import com.ehrmann.viatcheslav.othpost.entity.TrackingStatus;
 import com.ehrmann.viatcheslav.othpost.entity.Warehouse;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +27,8 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import javax.transaction.UserTransaction;
+import javax.xml.ws.WebServiceRef;
+import services.TransaktionServiceService;
 
 /**
  *
@@ -33,25 +36,63 @@ import javax.transaction.UserTransaction;
  */
 @WebService
 @RequestScoped
-public class ShippingService {
+public class ShippingService implements ShippingServiceIF {
+
+    @WebServiceRef(wsdlLocation = "WEB-INF/wsdl/im-lamport_8080/huberbank-1.0-SNAPSHOT/TransaktionService.wsdl")
+    private TransaktionServiceService service;
     @PersistenceContext
     private EntityManager em;
     
     @Resource
     private UserTransaction userTransaction;
     
+    @Override
     @WebMethod
     @Transactional
     public TrackingRemoteResponse shipRemote(Customer sender, Customer receiver, Invoice.ParcelType type) {
         Customer customerFromDB = isCustomerExisting(sender);
+        float price = 0.0f;
+        
         
         if(customerFromDB == null){
             customerFromDB = createCustomerRemote(sender);
         }
         
-        //createInvoiceHere
-        Parcel p = receiveParcelRemote(receiver, type);
+        Invoice invoice = createInvoice(type, 1.0f);
+        
+        if (type == Invoice.ParcelType.Brief) {
+            price = 1.0f;
+        } else if (type == Invoice.ParcelType.Packet) {
+            price = 2.0f;
+        } else if (type == Invoice.ParcelType.Palette) {
+            price = 3.0f;
+        }
+        
+        try { //createInvoiceHere
+            services.TransaktionService port = service.getTransaktionServicePort();
+            services.Konto receiverAccount = new services.Konto();
+            receiverAccount.setId(Long.MIN_VALUE);
+            services.Konto senderAccount = new services.Konto();
+            senderAccount.setId(Long.MAX_VALUE);
+            int cent = 0;
+
+            // TODO initialize WS operation arguments here
+            services.Transaktion transaktion = new services.Transaktion();
+            transaktion.setEuro((int)price);
+            transaktion.setCent(cent);
+            transaktion.setSender(senderAccount);
+            transaktion.setEmpfaenger(receiverAccount);
+
+            port.ueberweise(transaktion);
+        } catch (Exception ex) {
+            // TODO handle custom exceptions here
+        }
+
+        
+        
+        Parcel p = receiveParcelRemote(receiver, invoice);
         Tracking tracking = createTrackingEntryRemote(p);
+        
         
         shipParcel(sender, p, tracking);
         
@@ -110,7 +151,7 @@ public class ShippingService {
     
     @WebMethod(exclude = true)
     @Transactional
-    public Parcel receiveParcelRemote(Customer receiver, Invoice.ParcelType parcelType){
+    public Parcel receiveParcelRemote(Customer receiver, Invoice i){
         Parcel p = new Parcel();
         
         p.setForename(receiver.getForename());
@@ -121,11 +162,8 @@ public class ShippingService {
         p.setStreetNumber(receiver.getStreetNumber());
         
         //set real invoice here
-        p.setInvoice(new Invoice());
-        p.getInvoice().setPrice(0.0f);
-        p.getInvoice().setPaymentDateTime("jetzt");
-        p.getInvoice().setParcelType(parcelType);
-
+        p.setInvoice(i);
+        
         em.persist(p);
         
         return p;
@@ -214,7 +252,7 @@ public class ShippingService {
     @Transactional
     public Parcel receiveParcel(String recvforename, String recvsurename, 
             String recvcity, String recvstreet, String recvstreetNumber, 
-            int recpostalCode, Invoice.ParcelType type){
+            int recpostalCode, Invoice i){
         
         Parcel parcel = new Parcel();
         
@@ -225,15 +263,21 @@ public class ShippingService {
         parcel.setStreetNumber(recvstreetNumber);
         parcel.setPostalCode(recpostalCode);
         
-        parcel.setInvoice(new Invoice());
-        parcel.getInvoice().setPrice(0.0f);
-        parcel.getInvoice().setPaymentDateTime("jetzt");
-        parcel.getInvoice().setParcelType(type);
+        parcel.setInvoice(i);
         
         em.persist(parcel);
         
         return parcel;
     }
+    
+    public Invoice createInvoice(Invoice.ParcelType parcelType, float price){
+        Invoice i = new Invoice();
+        i.setParcelType(parcelType);
+        i.setPrice(price);
+        i.setPaymentDateTime(LocalDateTime.now().toString());
+        return i;
+    }
+    
     
     @WebMethod(exclude = true)
     @Transactional
@@ -292,15 +336,32 @@ public class ShippingService {
            return q.getResultList().get(0);
        
     }
+        
+    @Transactional
+    public List<TrackingStatus> getTrackingStatusList(String trackingNumber){
+        TypedQuery<Tracking> qz = em.createQuery("SELECT t FROM Tracking as t WHERE t.trackingNumber = :number", Tracking.class);
+        qz.setParameter("number", trackingNumber);
+        List<Tracking> trackingResult = qz.getResultList();
+        
+        if(!trackingResult.isEmpty())
+            return trackingResult.get(0).getTrackingStatus();
+        else
+            return null;
+    }
     
-    @WebMethod(exclude = true)
-    private void isInitWarehouse(){
-        TypedQuery<Warehouse> q = em.createQuery("SELECT w FROM Warehouse as w", Warehouse.class);
-        List<Warehouse> result = q.getResultList();    
-                
-        if(result.isEmpty()){
-            initWarehouse();
-        }
+    @Transactional
+    public Tracking createTrackingEntry(Parcel p){
+        Tracking t = new Tracking();
+        List<TrackingStatus> ts = new ArrayList<TrackingStatus>();
+        String uuid = UUID.randomUUID().toString();
+
+        t.setParcelObj(p);
+        t.setTrackingNumber(uuid);
+        t.setTrackingStatus(ts);
+        
+        em.persist(t);
+        
+        return t;
     }
     
     @WebMethod(exclude = true)

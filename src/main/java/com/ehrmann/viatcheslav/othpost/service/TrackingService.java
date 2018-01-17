@@ -29,30 +29,5 @@ public class TrackingService {
     private EntityManager em;
     
     
-    @Transactional
-    public List<TrackingStatus> getTrackingStatusList(String trackingNumber){
-        TypedQuery<Tracking> qz = em.createQuery("SELECT t FROM Tracking as t WHERE t.trackingNumber = :number", Tracking.class);
-        qz.setParameter("number", trackingNumber);
-        List<Tracking> trackingResult = qz.getResultList();
-        
-        if(!trackingResult.isEmpty())
-            return trackingResult.get(0).getTrackingStatus();
-        else
-            return null;
-    }
-    
-    @Transactional
-    public Tracking createTrackingEntry(Parcel p){
-        Tracking t = new Tracking();
-        List<TrackingStatus> ts = new ArrayList<TrackingStatus>();
-        String uuid = UUID.randomUUID().toString();
 
-        t.setParcelObj(p);
-        t.setTrackingNumber(uuid);
-        t.setTrackingStatus(ts);
-        
-        em.persist(t);
-        
-        return t;
-    }
 }

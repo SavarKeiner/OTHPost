@@ -12,7 +12,7 @@ package com.ehrmann.viatcheslav.othpost.service;
 public class RemoteLogger implements LoggerIF {
     @Override
     public void logOrder(String log) {
-        //write to logfile
+        //write to the log server
         System.out.println(log);
     }
 }

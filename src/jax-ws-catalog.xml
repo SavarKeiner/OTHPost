@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <system systemId="http://im-lamport:8080/huberbank-1.0-SNAPSHOT/TransaktionService?wsdl" uri="wsdl/im-lamport_8080/huberbank-1.0-SNAPSHOT/TransaktionService.wsdl"/>
+    <system systemId="http://im-lamport:8080/Lieferando-1/BestellService?wsdl" uri="wsdl/im-lamport_8080/Lieferando-1/BestellService.wsdl"/>
+</catalog>

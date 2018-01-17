@@ -16,5 +16,7 @@ Any value defined here will override the pom.xml file value but is only applicab
         <org-netbeans-modules-maven-j2ee.netbeans_2e_hint_2e_j2eeVersion>1.7-web</org-netbeans-modules-maven-j2ee.netbeans_2e_hint_2e_j2eeVersion>
         <org-netbeans-modules-maven-j2ee.netbeans_2e_hint_2e_deploy_2e_server>WildFly</org-netbeans-modules-maven-j2ee.netbeans_2e_hint_2e_deploy_2e_server>
         <org-netbeans-modules-projectapi.jsf_2e_language>Facelets</org-netbeans-modules-projectapi.jsf_2e_language>
+        <org-netbeans-modules-maven-jaxws._5f_C_5f_TransaktionService>http://im-lamport:8080/huberbank-1.0-SNAPSHOT/TransaktionService?wsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_TransaktionService>
+        <org-netbeans-modules-maven-jaxws._5f_C_5f_BestellService>http://im-lamport:8080/Lieferando-1/BestellService?wsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_BestellService>
     </properties>
 </project-shared-configuration>

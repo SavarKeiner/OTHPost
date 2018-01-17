@@ -22,6 +22,8 @@ import java.util.List;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.xml.ws.WebServiceRef;
+import services.TransaktionServiceService;
 
 /**
  *
@@ -30,6 +32,9 @@ import javax.inject.Named;
 @Named
 @RequestScoped
 public class ShippingModel implements Serializable {
+
+    @WebServiceRef(wsdlLocation = "WEB-INF/wsdl/im-lamport_8080/huberbank-1.0-SNAPSHOT/TransaktionService.wsdl")
+    private TransaktionServiceService service;
     @Inject
     private ShippingService ship;
     @Inject
@@ -162,6 +167,8 @@ public class ShippingModel implements Serializable {
     private String recvstreetNumber= "";
     private String recvpostalcode= "";
     
+    private String bankStatus = "";
+
     private String parcelTrackingNumber = "";
     private List<Invoice.ParcelType> parcelTypeList = Arrays.asList(Invoice.ParcelType.Brief, Invoice.ParcelType.Packet, Invoice.ParcelType.Palette);
     private Invoice.ParcelType typeParcel;
@@ -190,8 +197,19 @@ public class ShippingModel implements Serializable {
         this.parcelTypeList = parcelTypeList;
     }
     
-    public void createOrder(){
+    public String getBankStatus() {
+        return bankStatus;
+    }
+
+    public void setBankStatus(String bankStatus) {
+        this.bankStatus = bankStatus;
+    }
+    
+    public String createOrder(){
         if(verifyInputs()){
+            float price = 0;
+            boolean didBankFail = false;
+            
             Customer c = ship.isCustomerExsiting(sendforename, sendsurename, 
                     sendcity, sendstreet, sendstreetNumber, sendiban, Integer.parseInt(sendpostalcode));
             
@@ -200,9 +218,43 @@ public class ShippingModel implements Serializable {
                     sendcity, sendstreet, sendstreetNumber, sendiban, Integer.parseInt(sendpostalcode));
             }
             
-            Parcel parcel = ship.receiveParcel(recvforename, recvsurename, recvcity, recvstreet, recvstreetNumber, Integer.parseInt(sendpostalcode), typeParcel);
-            Tracking tracking = trackingService.createTrackingEntry(parcel);
-            //createInvoice
+            if(typeParcel == ParcelType.Brief)
+                price = 1.0f;
+            else if(typeParcel == ParcelType.Packet)
+                price = 2.0f;
+            else if(typeParcel == ParcelType.Palette)
+                price = 3.0f;
+            
+            Invoice invoice = ship.createInvoice(typeParcel, price);
+            try { //createInvoice
+                services.TransaktionService port = service.getTransaktionServicePort();
+                services.Konto receiverAccount = new services.Konto();
+                receiverAccount.setId((long)7777);
+                services.Konto senderAccount = new services.Konto();
+                senderAccount.setId(Long.parseLong(this.getSendiban()));
+                int cent = 0;
+                
+                // TODO initialize WS operation arguments here
+                services.Transaktion transaktion = new services.Transaktion();
+                transaktion.setEuro((int)price);
+                transaktion.setCent(cent);
+                transaktion.setSender(senderAccount);
+                transaktion.setEmpfaenger(receiverAccount);
+                
+                port.ueberweise(transaktion);
+            } catch (Exception ex) {
+                this.setBankStatus("Entweder ist die Kontonummer der Huber Bank nicht bekannt "
+                        + "der Huber Bank ist zurzeit nicht erreichbar");
+            }
+            
+            Parcel parcel = ship.receiveParcel(recvforename, recvsurename, recvcity, recvstreet, recvstreetNumber, Integer.parseInt(sendpostalcode), invoice);
+            Tracking tracking = ship.createTrackingEntry(parcel);            
+           
+            
+            
+
+            
+            
             
             setParcelTrackingNumber(tracking.getTrackingNumber());
             ship.shipParcel(c, parcel, tracking);
@@ -211,6 +263,7 @@ public class ShippingModel implements Serializable {
             
             ship.simulateDelivery(c, parcel);
         }
+        return "order.xhtml";
     }
     
     private boolean verifyInputs(){
