@@ -94,7 +94,7 @@ public class ShippingService implements ShippingServiceIF {
         Tracking tracking = createTrackingEntryRemote(p);
         
         
-        shipParcel(sender, p, tracking);
+        shipParcel(customerFromDB, p, tracking);
         
         simulateDelivery(customerFromDB, p);
         
@@ -270,6 +270,7 @@ public class ShippingService implements ShippingServiceIF {
         return parcel;
     }
     
+    @WebMethod(exclude=true)
     public Invoice createInvoice(Invoice.ParcelType parcelType, float price){
         Invoice i = new Invoice();
         i.setParcelType(parcelType);
@@ -337,6 +338,7 @@ public class ShippingService implements ShippingServiceIF {
        
     }
         
+    @WebMethod(exclude=true)
     @Transactional
     public List<TrackingStatus> getTrackingStatusList(String trackingNumber){
         TypedQuery<Tracking> qz = em.createQuery("SELECT t FROM Tracking as t WHERE t.trackingNumber = :number", Tracking.class);
@@ -349,6 +351,7 @@ public class ShippingService implements ShippingServiceIF {
             return null;
     }
     
+    @WebMethod(exclude=true)
     @Transactional
     public Tracking createTrackingEntry(Parcel p){
         Tracking t = new Tracking();
