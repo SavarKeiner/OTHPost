@@ -14,8 +14,7 @@ import com.ehrmann.viatcheslav.othpost.entity.Tracking;
 import com.ehrmann.viatcheslav.othpost.service.LoggerIF;
 import com.ehrmann.viatcheslav.othpost.service.LoggerType;
 import com.ehrmann.viatcheslav.othpost.service.Loggers;
-import com.ehrmann.viatcheslav.othpost.service.ShippingService;
-import com.ehrmann.viatcheslav.othpost.service.TrackingService;
+import com.ehrmann.viatcheslav.othpost.service.ShippingServiceIF;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -36,18 +35,12 @@ public class ShippingModel implements Serializable {
     @WebServiceRef(wsdlLocation = "WEB-INF/wsdl/im-lamport_8080/huberbank-1.0-SNAPSHOT/TransaktionService.wsdl")
     private TransaktionServiceService service;
     @Inject
-    private ShippingService ship;
-    @Inject
-    private TrackingService trackingService;
+    private ShippingServiceIF ship;
 
     @Inject
     @Loggers(LoggerType.Web)
     private LoggerIF weblogger;
-    
-    @Inject
-    @Loggers(LoggerType.Remote)
-    private LoggerIF remotelogger;
-    
+        
     public String getSendforename() {
         return sendforename;
     }
@@ -229,7 +222,7 @@ public class ShippingModel implements Serializable {
             try { //createInvoice
                 services.TransaktionService port = service.getTransaktionServicePort();
                 services.Konto receiverAccount = new services.Konto();
-                receiverAccount.setId((long)7777);
+                receiverAccount.setId((long)202);
                 services.Konto senderAccount = new services.Konto();
                 senderAccount.setId(Long.parseLong(this.getSendiban()));
                 int cent = 0;
@@ -242,9 +235,10 @@ public class ShippingModel implements Serializable {
                 transaktion.setEmpfaenger(receiverAccount);
                 
                 port.ueberweise(transaktion);
-            } catch (Exception ex) {
-                this.setBankStatus("Entweder ist die Kontonummer der Huber Bank nicht bekannt "
-                        + "der Huber Bank ist zurzeit nicht erreichbar");
+            } catch (services.TransaktionFailedException_Exception ex) {
+                this.setBankStatus("Die Kontonummer ist der Huber Bank nicht bekannt");
+            } catch (Exception e){
+                this.setBankStatus("Die Huber Bank ist zurzeit nicht erreichbar");
             }
             
             Parcel parcel = ship.receiveParcel(recvforename, recvsurename, recvcity, recvstreet, recvstreetNumber, Integer.parseInt(sendpostalcode), invoice);
