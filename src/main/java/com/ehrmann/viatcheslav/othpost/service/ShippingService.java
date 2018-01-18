@@ -71,9 +71,9 @@ public class ShippingService implements ShippingServiceIF {
         try { //createInvoiceHere
             services.TransaktionService port = service.getTransaktionServicePort();
             services.Konto receiverAccount = new services.Konto();
-            receiverAccount.setId(Long.MIN_VALUE);
+            receiverAccount.setId((long)202);
             services.Konto senderAccount = new services.Konto();
-            senderAccount.setId(Long.MAX_VALUE);
+            senderAccount.setId(Long.parseLong(sender.getIban()));
             int cent = 0;
 
             // TODO initialize WS operation arguments here
@@ -131,6 +131,7 @@ public class ShippingService implements ShippingServiceIF {
         return response;
     }
     
+    @Override
     @WebMethod(exclude=true)
     @Transactional
     public Tracking createTrackingEntryRemote(Parcel p){
@@ -149,6 +150,7 @@ public class ShippingService implements ShippingServiceIF {
         return t;
     }
     
+    @Override
     @WebMethod(exclude = true)
     @Transactional
     public Parcel receiveParcelRemote(Customer receiver, Invoice i){
@@ -169,6 +171,7 @@ public class ShippingService implements ShippingServiceIF {
         return p;
     }
     
+    @Override
     @WebMethod(exclude = true)
     @Transactional
     public Customer createCustomerRemote(Customer sender){
@@ -191,6 +194,7 @@ public class ShippingService implements ShippingServiceIF {
         return null;
     }
     
+    @Override
     @WebMethod(exclude = true)
     @Transactional
     public void simulateDelivery(Customer c, Parcel p){
@@ -233,6 +237,7 @@ public class ShippingService implements ShippingServiceIF {
         em.merge(t);
     }
 
+    @Override
     @WebMethod(exclude = true)
     @Transactional
     public void shipParcel(Customer c, Parcel p, Tracking t){//need invoice
@@ -248,6 +253,7 @@ public class ShippingService implements ShippingServiceIF {
         em.persist(p1);
     }
     
+    @Override
     @WebMethod(exclude = true)
     @Transactional
     public Parcel receiveParcel(String recvforename, String recvsurename, 
@@ -270,6 +276,7 @@ public class ShippingService implements ShippingServiceIF {
         return parcel;
     }
     
+    @Override
     @WebMethod(exclude=true)
     public Invoice createInvoice(Invoice.ParcelType parcelType, float price){
         Invoice i = new Invoice();
@@ -279,7 +286,7 @@ public class ShippingService implements ShippingServiceIF {
         return i;
     }
     
-    
+    @Override
     @WebMethod(exclude = true)
     @Transactional
     public Customer createCustomer(String forename, String surename, String city, 
@@ -299,6 +306,7 @@ public class ShippingService implements ShippingServiceIF {
         return c;
     }
 
+    @Override
     @WebMethod(exclude = true)
     public Customer isCustomerExisting(Customer c){
         TypedQuery<Customer> q = em.createQuery("SELECT ca FROM Customer as ca WHERE ca.forename = :forename AND ca.surename = :surename AND ca.city = :city AND ca.street = :street AND ca.streetNumber = :streetNumber AND ca.iban = :iban", Customer.class);
@@ -316,6 +324,7 @@ public class ShippingService implements ShippingServiceIF {
            return result.get(0);
     }
     
+    @Override
     @WebMethod(exclude = true)
     public Customer isCustomerExsiting(String forename, String surename, String city, 
             String street, String streetNumber, String iban, int postalcode){
@@ -338,6 +347,7 @@ public class ShippingService implements ShippingServiceIF {
        
     }
         
+    @Override
     @WebMethod(exclude=true)
     @Transactional
     public List<TrackingStatus> getTrackingStatusList(String trackingNumber){
@@ -351,6 +361,7 @@ public class ShippingService implements ShippingServiceIF {
             return null;
     }
     
+    @Override
     @WebMethod(exclude=true)
     @Transactional
     public Tracking createTrackingEntry(Parcel p){
@@ -367,6 +378,7 @@ public class ShippingService implements ShippingServiceIF {
         return t;
     }
     
+    //init db when helper function
     @WebMethod(exclude = true)
     @Transactional
     private void initWarehouse(){
